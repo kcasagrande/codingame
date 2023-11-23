@@ -1,3 +1,5 @@
+package codingame.training.easy.onedspreadsheet
+
 import scala.io.StdIn._
 
 sealed trait Operand {

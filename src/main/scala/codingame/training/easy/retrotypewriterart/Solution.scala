@@ -1,3 +1,5 @@
+package codingame.training.easy.retrotypewriterart
+
 import scala.io.StdIn
 
 object Solution extends App {
@@ -11,7 +13,9 @@ object Solution extends App {
         .split(" ")
         .map {
             case "nl" => "\n"
-            case characterChunk(quantity, character) => abbreviations.applyOrElse[String, String](character, identity).repeat(quantity.toInt)
+            case characterChunk(quantity, character) =>
+              val actualCharacter = abbreviations.applyOrElse[String, String](character, identity)
+              List.fill(quantity.toInt)(actualCharacter).mkString
         }
         .foreach(print)
 }
