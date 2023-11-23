@@ -73,7 +73,7 @@ object Solution extends App {
         .map(_.swap)
         .toMap
         .map(entry => entry._1 -> Operation(entry._2))
-    map.values
-        .map(_.value(map))
+    map.keys.toSeq.sorted
+        .map(map(_).value(map))
         .foreach(println)
 }
