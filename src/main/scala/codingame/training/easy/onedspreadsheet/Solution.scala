@@ -94,5 +94,4 @@ object Solution extends App {
     .sortBy(_._1)
     .map(_._2)
     .foreach(println)
-
 }
