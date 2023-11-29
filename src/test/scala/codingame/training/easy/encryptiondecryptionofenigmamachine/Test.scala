@@ -36,4 +36,19 @@ class Test
           |""".stripMargin
     }
   }
+  "Decode" - {
+    "should decode a message" in outputWithInput {
+      """DECODE
+        |9
+        |BDFHJLCPRTXVZNYEIWGAKMUSQO
+        |AJDKSIRUXBLHWTMCQGZNPYFVOE
+        |EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        |PQSACVVTOISXFXCIAMQEM
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """EVERYONEISWELCOMEHERE
+          |""".stripMargin
+    }
+  }
 }
