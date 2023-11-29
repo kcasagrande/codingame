@@ -19,7 +19,14 @@ object Solution extends App {
     .map(Rotor(_))
   val message = readLine()
 
-  def caesarShift(shift: Int)(implicit alphabet: String): (String) => String = _ => "EFG"
+  def caesarShift(shift: Int)(implicit alphabet: String): (String) => String = _
+    .map(alphabet.indexOf(_))
+    .zipWithIndex
+    .map(tuple => tuple._1 + tuple._2)
+    .map(_ + shift)
+    .map(_ % alphabet.length)
+    .map(alphabet(_))
+    .mkString
 
   val encode = rotors.foldLeft(caesarShift(initialShift)) { (operations, rotor) => operations andThen rotor }
 
