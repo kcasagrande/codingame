@@ -22,5 +22,18 @@ class Test
         """KQF
           |""".stripMargin
     }
+    "should encode a rather long message" in outputWithInput {
+      """ENCODE
+        |7
+        |BDFHJLCPRTXVZNYEIWGAKMUSQO
+        |AJDKSIRUXBLHWTMCQGZNPYFVOE
+        |EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        |WEATHERREPORTWINDYTODAY
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """ALWAURKQEQQWLRAWZHUYKVN
+          |""".stripMargin
+    }
   }
 }
