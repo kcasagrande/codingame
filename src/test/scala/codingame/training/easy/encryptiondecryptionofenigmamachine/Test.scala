@@ -50,5 +50,18 @@ class Test
         """EVERYONEISWELCOMEHERE
           |""".stripMargin
     }
+    "should decode a long message" in outputWithInput {
+      """DECODE
+        |5
+        |BDFHJLCPRTXVZNYEIWGAKMUSQO
+        |AJDKSIRUXBLHWTMCQGZNPYFVOE
+        |EKMFLGDQVZNTOWYHXUSPAIBRCJ
+        |XPCXAUPHYQALKJMGKRWPGYHFTKRFFFNOUTZCABUAEHQLGXREZ
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """THEQUICKBROWNFOXJUMPSOVERALAZYSPHINXOFBLACKQUARTZ
+          |""".stripMargin
+    }
   }
 }
