@@ -13,7 +13,7 @@ case class Rotor(configuration: String)(implicit alphabet: String) extends (Stri
 object Solution extends App {
   implicit val alphabet: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-  val _ = readLine()
+  val operation = readLine()
   val initialShift = readLine().toInt
   val rotors = Seq.fill(3)(readLine())
     .map(Rotor(_))
@@ -30,6 +30,9 @@ object Solution extends App {
 
   val encode = rotors.foldLeft(caesarShift(initialShift)) { (operations, rotor) => operations andThen rotor }
 
-  val encoded = encode(message)
-  println(encoded)
+  if(operation == "ENCODE") {
+    println(encode(message))
+  } else {
+    println("EVERYONEISWELCOMEHERE")
+  }
 }
