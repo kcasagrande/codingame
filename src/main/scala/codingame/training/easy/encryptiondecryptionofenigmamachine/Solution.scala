@@ -8,6 +8,11 @@ case class Rotor(configuration: String)(implicit alphabet: String) extends (Stri
       .map(alphabet.indexOf(_))
       .map(configuration(_))
       .mkString
+
+  val reverse: String => String = _
+    .map(configuration.indexOf(_))
+    .map(alphabet(_))
+    .mkString
 }
 
 object Solution extends App {
@@ -28,11 +33,14 @@ object Solution extends App {
     .map(alphabet(_))
     .mkString
 
+  def caesarUnshift(shift: Int)(implicit alphabet: String): (String) => String = caesarShift(shift)(alphabet.reverse)
+
   val encode = rotors.foldLeft(caesarShift(initialShift)) { (operations, rotor) => operations andThen rotor }
+  val decode = rotors.foldRight(identity[String](_)){ (rotor, operations) => operations andThen rotor.reverse } andThen caesarUnshift(initialShift)
 
   if(operation == "ENCODE") {
     println(encode(message))
   } else {
-    println("EVERYONEISWELCOMEHERE")
+    println(decode(message))
   }
 }
