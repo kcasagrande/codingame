@@ -11,7 +11,7 @@ case class Point(
 }
 
 case class Instruction(center: Point, diameter: Int) {
-  def includes(point: Point): Boolean = (point <-> center) <= (diameter / 2)
+  def includes(point: Point): Boolean = (point <-> center) <= (diameter / 2.0)
 }
 object Instruction {
   val fromInput: Regex = "^([a-s])([a-y])(0|[1-9][0-9]*)$".r
