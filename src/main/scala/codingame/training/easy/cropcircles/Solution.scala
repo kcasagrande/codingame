@@ -20,7 +20,7 @@ object Instruction {
 }
 
 object Solution extends App {
-  val instruction = readLine match {
+  val instructions = readLine.split(" ").map {
     case Instruction.fromInput(x, y, d) => Instruction.fromMatch(x, y, d)
   }
   val field = (for {
@@ -29,7 +29,7 @@ object Solution extends App {
     (for {
       x <- 0 until 19
     } yield {
-      if(instruction.includes(Point(x, y))) {
+      if(instructions.exists(_.includes(Point(x, y)))) {
         "  "
       } else {
         "{}"
