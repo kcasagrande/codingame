@@ -50,16 +50,18 @@ object Instruction {
 }
 
 object Solution extends App {
+  private val width = 19
+  private val height = 25
   val instructions = readLine.split(" ").map {
     case Instruction.fromInput(operation, x, y, d) => Instruction.fromMatch(operation, x, y, d)
   }
-  val initialField: Seq[Seq[State]] = Seq.fill(25)(Seq.fill(19)(State.Planted))
+  val initialField: Seq[Seq[State]] = Seq.fill(height)(Seq.fill(width)(State.Planted))
   val field = instructions.foldLeft(initialField){(currentField, instruction) =>
     for {
-      y <- 0 until 25
+      y <- 0 until height
     } yield {
       for {
-        x <- 0 until 19
+        x <- 0 until width
       } yield {
         if(instruction.includes(Point(x, y))) {
           currentField(y)(x).apply(instruction)
