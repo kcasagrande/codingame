@@ -61,5 +61,18 @@ class Test
           |#####
           |""".stripMargin
     }
+    "should reach a free space two moves away from the starting position" in outputWithInput {
+      """5 3
+        |#####
+        |#S..#
+        |#####
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """#####
+          |#012#
+          |#####
+          |""".stripMargin
+    }
   }
 }
