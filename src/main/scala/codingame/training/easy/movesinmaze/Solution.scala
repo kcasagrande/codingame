@@ -7,6 +7,7 @@ object Solution extends App {
   val maze = LazyList.fill(height)(readLine.toSeq)
   val output = maze.map(_.map {
     case 'S' => '0'
+    case '.' => '1'
     case anythingElse => anythingElse
   }.mkString).mkString("\n")
   println(output)
