@@ -35,5 +35,31 @@ class Test
           |####
           |""".stripMargin
     }
+    "should reach another only free space, adjacent to the starting position, in one move" in outputWithInput {
+      """4 3
+        |####
+        |#.S#
+        |####
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """####
+          |#10#
+          |####
+          |""".stripMargin
+    }
+    "should reach two free spaces adjacent to the starting position, in one move each" in outputWithInput {
+      """5 3
+        |#####
+        |#.S.#
+        |#####
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """#####
+          |#101#
+          |#####
+          |""".stripMargin
+    }
   }
 }
