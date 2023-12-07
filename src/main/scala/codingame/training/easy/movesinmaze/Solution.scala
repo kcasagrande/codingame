@@ -4,10 +4,10 @@ import scala.io.StdIn._
 
 object Solution extends App {
   val Array(width, height) = readLine.split(" ").filterNot(_.isEmpty).map(_.toInt)
-  print(
-    """###
-      |#0#
-      |###
-      |""".stripMargin
-  )
+  val maze = LazyList.fill(height)(readLine.toSeq)
+  val output = maze.map(_.map {
+    case 'S' => '0'
+    case anythingElse => anythingElse
+  }.mkString).mkString("\n")
+  println(output)
 }
