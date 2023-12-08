@@ -74,5 +74,18 @@ class Test
           |#####
           |""".stripMargin
     }
+    "should never reach an unreachable space" in outputWithInput {
+      """6 3
+        |######
+        |#S.#.#
+        |######
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """######
+          |#01#.#
+          |######
+          |""".stripMargin
+    }
   }
 }
