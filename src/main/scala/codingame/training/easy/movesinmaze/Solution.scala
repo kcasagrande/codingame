@@ -80,7 +80,12 @@ object Solution extends App {
     (for {
       x <- 0 until width
     } yield {
-      distances.get(Point(x, y)).map(digits(_)).getOrElse('#')
+      distances.get(Point(x, y))
+        .map(digits(_))
+        .getOrElse(maze(y)(x) match {
+          case Space.Wall => '#'
+          case Space.Free => '.'
+        })
     })
       .mkString
   })
