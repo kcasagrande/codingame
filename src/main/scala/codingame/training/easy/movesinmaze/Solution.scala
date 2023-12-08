@@ -1,8 +1,6 @@
 package codingame.training.easy.movesinmaze
 
-import codingame.training.easy.movesinmaze.Solution.Height
-import codingame.training.easy.movesinmaze.Space._
-
+import scala.collection.immutable
 import scala.io.StdIn._
 import scala.language.implicitConversions
 
@@ -12,12 +10,6 @@ object Space {
   case object Wall extends Space
   case object StartingPosition extends Space
 }
-
-case class Maze(spaces: Seq[Seq[Space]])
-trait StartingPosition { self => Maze
-  def startingPosition: (Int, Int)
-}
-
 
 object Solution extends App {
   case class Width(value: Int) extends AnyVal
@@ -41,24 +33,57 @@ object Solution extends App {
     def south(implicit height: Height): Point = Point(x, y.south)
     def west(implicit width: Width): Point = Point(x.west, y)
     def east(implicit width: Width): Point = Point(x.east, y)
-  }
-  trait Reached { self: Point =>
-    def moves: Int
+    
+    def isWall(implicit maze: Maze): Boolean = maze(y)(x) == Space.Wall
   }
   val Array(w, h) = readLine.split(" ")
     .filterNot(_.isEmpty)
     .map(_.toInt)
   implicit val height: Height = Height(h)
   implicit val width: Width = Width(w)
+
+  type Maze = Seq[Seq[Space]]
+  implicit val maze: Maze = LazyList.fill(height)(readLine.map {
+    case 'S' => Space.StartingPosition
+    case '.' => Space.Free
+    case _ => Space.Wall
+  })
   
-  val maze = LazyList.fill(height)(readLine.toSeq)
-  val startingPositionY = maze.indexWhere(_.exists(_ == 'S'))
-  val startingPositionX = maze(startingPositionY).indexWhere(_ == 'S')
+  val startingPositionY = maze.indexWhere(_.exists(_ == Space.StartingPosition))
+  val startingPositionX = maze(startingPositionY).indexWhere(_ == Space.StartingPosition)
   
-  val output = maze.map(_.map {
-    case 'S' => '0'
-    case '.' => '1'
-    case anythingElse => anythingElse
-  }.mkString).mkString("\n")
+  def run(
+           from: Point,
+           fromDistance: Int,
+           distances: immutable.Map[Point, Int] = immutable.Map.empty[Point, Int]
+         )(implicit maze: Maze): immutable.Map[Point, Int] = {
+    def next(point: Point): immutable.Map[Point, Int] =
+      Some(point).filterNot(_.isWall).map(run(_, fromDistance + 1, distances + (from -> fromDistance))).getOrElse(immutable.Map.empty[Point, Int])
+    distances.get(from).filter(_ < fromDistance)
+      match {
+        case None => distances + (from -> fromDistance) ++
+          next(from.north) ++
+          next(from.south) ++
+          next(from.west) ++
+          next(from.east)
+        case _ => distances
+      }
+  }
+
+  val distances = run(Point(startingPositionX, startingPositionY), 0)
+  
+  val digits = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+  
+  val output = (for {
+    y <- 0 until height
+  } yield {
+    (for {
+      x <- 0 until width
+    } yield {
+      distances.get(Point(x, y)).map(digits(_)).getOrElse('#')
+    })
+      .mkString
+  })
+    .mkString("\n")
   println(output)
 }
