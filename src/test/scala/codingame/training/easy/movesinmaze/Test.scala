@@ -87,5 +87,22 @@ class Test
           |######
           |""".stripMargin
     }
+    "should handle a loop" in outputWithInput {
+      """5 5
+        |#####
+        |#S..#
+        |#.#.#
+        |#...#
+        |#####
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """#####
+          |#012#
+          |#1#3#
+          |#234#
+          |#####
+          |""".stripMargin
+    }
   }
 }
