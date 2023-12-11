@@ -1,6 +1,6 @@
 package codingame.training.easy.movesinmaze
 
-import scala.collection.immutable
+import scala.collection.immutable.Map
 import scala.io.StdIn._
 import scala.language.implicitConversions
 
@@ -23,6 +23,21 @@ object Solution extends App {
     def south(implicit height: Height): Int = Some(value + 1).filterNot(_ >= height).getOrElse(0)
     def west(implicit width: Width): Int = Some(value - 1).filterNot(_ < 0).getOrElse(width - 1)
     def east(implicit width: Width): Int = Some(value + 1).filterNot(_ >= width).getOrElse(0)
+  }
+
+  implicit class ExtendedMap[K, V: Ordering](innerMap: Map[K, V]) {
+    def updatedIfBetter(key: K, value: V): Map[K, V] =
+      innerMap.updated(
+          key,
+          innerMap.get(key)
+            .filter(implicitly[Ordering[V]].lt(_, value))
+            .getOrElse(value)
+      )
+
+    def updatedAllIfBetter(newMap: IterableOnce[(K, V)]): Map[K, V] =
+      newMap.iterator.foldLeft(innerMap){(map, entry) =>
+        map.updatedIfBetter(entry._1, entry._2)
+      }
   }
 
   case class Point(
@@ -55,19 +70,20 @@ object Solution extends App {
   def run(
            from: Point,
            fromDistance: Int,
-           distances: immutable.Map[Point, Int] = immutable.Map.empty[Point, Int]
-         )(implicit maze: Maze): immutable.Map[Point, Int] = {
-    def next(point: Point): immutable.Map[Point, Int] =
-      Some(point).filterNot(_.isWall).map(run(_, fromDistance + 1, distances + (from -> fromDistance))).getOrElse(immutable.Map.empty[Point, Int])
-    distances.get(from).filter(_ < fromDistance)
-      match {
-        case None => distances + (from -> fromDistance) ++
-          next(from.north) ++
-          next(from.south) ++
-          next(from.west) ++
-          next(from.east)
-        case _ => distances
-      }
+           distances: Map[Point, Int] = Map.empty[Point, Int]
+         )(implicit maze: Maze): Map[Point, Int] = {
+
+    def next(point: Point): Map[Point, Int] =
+      Some(point).filterNot(_.isWall).map(run(_, fromDistance + 1, distances + (from -> fromDistance))).getOrElse(Map.empty[Point, Int])
+
+    distances.get(from).filter(_ < fromDistance) match {
+      case None => (distances + (from -> fromDistance))
+        .updatedAllIfBetter(next(from.north))
+        .updatedAllIfBetter(next(from.south))
+        .updatedAllIfBetter(next(from.west))
+        .updatedAllIfBetter(next(from.east))
+      case _ => distances
+    }
   }
 
   val distances = run(Point(startingPositionX, startingPositionY), 0)
