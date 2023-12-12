@@ -72,17 +72,14 @@ object Solution extends App {
            fromDistance: Int,
            distances: Map[Point, Int] = Map.empty[Point, Int]
          )(implicit maze: Maze): Map[Point, Int] = {
-
-    def next(point: Point): Map[Point, Int] =
-      Some(point).filterNot(_.isWall).map(run(_, fromDistance + 1, distances + (from -> fromDistance))).getOrElse(Map.empty[Point, Int])
-
-    distances.get(from).filter(_ < fromDistance) match {
-      case None => (distances + (from -> fromDistance))
-        .updatedAllIfBetter(next(from.north))
-        .updatedAllIfBetter(next(from.south))
-        .updatedAllIfBetter(next(from.west))
-        .updatedAllIfBetter(next(from.east))
-      case _ => distances
+      Seq(from.north, from.south, from.east, from.west).foldLeft(distances + (from -> fromDistance)) { (currentDistances, neighbour) =>
+        if (neighbour.isWall) {
+          currentDistances
+        } else if (currentDistances.get(neighbour).exists(_ < fromDistance + 1)) {
+          currentDistances
+        } else {
+          run(neighbour, fromDistance + 1, currentDistances)
+        }
     }
   }
 
