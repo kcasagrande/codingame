@@ -104,5 +104,20 @@ class Test
           |#####
           |""".stripMargin
     }
+    "should handle multiple paths" in outputWithInput {
+      """4 4
+        |####
+        |#S.#
+        |#..#
+        |####
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """####
+          |#01#
+          |#12#
+          |####
+          |""".stripMargin
+    }
   }
 }
