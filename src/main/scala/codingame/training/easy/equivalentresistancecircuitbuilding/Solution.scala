@@ -9,16 +9,18 @@ sealed trait Circuit {
   def resistance(individualResistances: Map[String, Float]): Float
 }
 object Circuit {
+  private val regex: Regex = Seq(Resistor.regex.regex, Serie.regex.regex, Parallel.regex.regex).mkString("|").r
   def apply(circuitAsString: String): Circuit = circuitAsString match {
     case Resistor.regex(name) => Resistor(name)
-    case Serie.regex(subCircuit) => Serie(subCircuit.split(" ").toSeq.map(Circuit(_)))
-    case Parallel.regex(subCircuit) => Parallel(subCircuit.split(" ").toSeq.map(Circuit(_)))
+    case Serie.regex(subCircuit) => Serie(regex.findAllMatchIn(subCircuit).toSeq.map(_.matched).map(Circuit(_)))
+    case Parallel.regex(subCircuit) => Parallel(regex.findAllMatchIn(subCircuit).toSeq.map(_.matched).map(Circuit(_)))
   }
+
   case class Resistor(name: String) extends Circuit {
     override def resistance(individualResistances: Map[String, Float]): Float = individualResistances(name)
   }
   object Resistor {
-    val regex: Regex = """([^\s]+)""".r
+    val regex: Regex = """([^\s\)\(\]\[]+)""".r
   }
   case class Serie(subCircuits: Seq[Circuit]) extends Circuit {
     override def resistance(individualResistances: Map[String, Float]): Float = subCircuits.map(_.resistance(individualResistances)).sum
