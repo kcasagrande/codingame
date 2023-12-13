@@ -12,7 +12,7 @@ object Circuit {
   def apply(circuitAsString: String): Circuit = circuitAsString match {
     case Resistor.regex(name) => Resistor(name)
     case Serie.regex(subCircuit) => Serie(subCircuit.split(" ").toSeq.map(Circuit(_)))
-    case _ => Resistor("DUMMY")
+    case Parallel.regex(subCircuit) => Parallel(subCircuit.split(" ").toSeq.map(Circuit(_)))
   }
   case class Resistor(name: String) extends Circuit {
     override def resistance(individualResistances: Map[String, Float]): Float = individualResistances(name)
@@ -25,6 +25,12 @@ object Circuit {
   }
   object Serie {
     val regex: Regex = """\( (.*) \)""".r
+  }
+  case class Parallel(subCircuits: Seq[Circuit]) extends Circuit {
+    override def resistance(individualResistances: Map[String, Float]): Float = 1 / subCircuits.map(_.resistance(individualResistances)).map(1/_).sum
+  }
+  object Parallel {
+    val regex: Regex = """\[ (.*) \]""".r
   }
 }
 
