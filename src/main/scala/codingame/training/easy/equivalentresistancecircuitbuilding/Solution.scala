@@ -2,11 +2,45 @@ package codingame.training.easy.equivalentresistancecircuitbuilding
 
 import java.util.Locale.US
 import scala.io.StdIn._
+import scala.util.matching.Regex
+import scala.collection.immutable.Map
+
+sealed trait Circuit {
+  def resistance(individualResistances: Map[String, Float]): Float
+}
+object Circuit {
+  def apply(circuitAsString: String): Circuit = circuitAsString match {
+    case Resistor.regex(name) => Resistor(name)
+    case Serie.regex(subCircuit) => Serie(subCircuit.split(" ").toSeq.map(Circuit(_)))
+    case _ => Resistor("DUMMY")
+  }
+  case class Resistor(name: String) extends Circuit {
+    override def resistance(individualResistances: Map[String, Float]): Float = individualResistances(name)
+  }
+  object Resistor {
+    val regex: Regex = """([^\s]+)""".r
+  }
+  case class Serie(subCircuits: Seq[Circuit]) extends Circuit {
+    override def resistance(individualResistances: Map[String, Float]): Float = subCircuits.map(_.resistance(individualResistances)).sum
+  }
+  object Serie {
+    val regex: Regex = """\( (.*) \)""".r
+  }
+}
 
 object Solution extends App {
-  readLine
-  val Array(name, _resistance) = readLine.split(" ")
-  val resistances: Map[String, Float] = Map(name -> _resistance.toFloat)
-  val resistance = resistances("A")
-  println("%.1f".formatLocal(US, resistance))
+  val resistorsNumber = readLine.toInt
+  val resistances: Map[String, Float] =
+    (
+      for {
+        _ <- 0 until resistorsNumber
+      } yield {
+        readLine
+      }
+    )
+      .map(_.split(" "))
+      .map(array => array.head -> array.last.toFloat)
+      .toMap
+  val circuit = Circuit(readLine)
+  println("%.1f".formatLocal(US, circuit.resistance(resistances)))
 }
