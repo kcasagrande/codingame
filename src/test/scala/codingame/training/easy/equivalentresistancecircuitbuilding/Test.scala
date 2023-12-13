@@ -30,5 +30,16 @@ class Test
         """3.0
           |""".stripMargin
     }
+    "should determine the resistance of two resistors in parallel" in outputWithInput {
+      """2
+        |A 4
+        |B 4
+        |[ A B ]
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """2.0
+          |""".stripMargin
+    }
   }
 }
