@@ -19,5 +19,16 @@ class Test
         """1.0
           |""".stripMargin
     }
+    "should determine the resistance of a serie of two resistors" in outputWithInput {
+      """2
+        |A 1
+        |B 2
+        |( A B )
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """3.0
+          |""".stripMargin
+    }
   }
 }
