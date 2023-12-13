@@ -41,5 +41,17 @@ class Test
         """2.0
           |""".stripMargin
     }
+    "should determine the resistance of the combined example" in outputWithInput {
+      """3
+        |A 24
+        |B 8
+        |C 48
+        |[ ( A B ) [ C A ] ]
+        |""".stripMargin
+    } {
+      _ shouldEqual
+        """10.7
+          |""".stripMargin
+    }
   }
 }
