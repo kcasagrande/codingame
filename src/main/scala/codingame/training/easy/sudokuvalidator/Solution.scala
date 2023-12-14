@@ -4,7 +4,7 @@ import scala.io.StdIn._
 
 object Solution extends App {
   def hasRowError(grid: Seq[Seq[String]]): Boolean = grid.exists(
-    _.containsSlice(Seq("2", "2"))
+    _.groupMapReduce(identity[String])(_ => 1)(_ + _).exists(_._2 > 1)
   )
 
   val grid = (for {
