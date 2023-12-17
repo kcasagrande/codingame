@@ -61,5 +61,22 @@ class Test
           |""".stripMargin
     }
 
+    "should detect a column error" in outputWithInput(
+      """1 2 3 4 5 6 7 8 9
+        |1 5 6 7 8 9 2 4 3
+        |7 8 9 1 2 3 4 5 6
+        |9 1 2 3 4 5 6 7 8
+        |3 4 5 6 7 8 9 1 2
+        |6 7 8 9 1 2 3 4 5
+        |8 9 1 2 3 4 5 6 7
+        |2 3 4 5 6 7 8 9 1
+        |5 6 7 8 9 1 2 3 4
+        |""".stripMargin
+      ) {
+      _ shouldEqual
+        """false
+          |""".stripMargin
+    }
+
   }
 }
