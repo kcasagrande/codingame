@@ -12,7 +12,9 @@ object Player extends App {
 
   type Id = String
 
-  case class Creature(id: Id, color: Int, `type`: Int)
+  case class Creature(id: Id, color: Int, `type`: Int) {
+    val points: Int = `type` + 1
+  }
 
   case class GameContext(creatures: Set[Creature])
 
@@ -23,6 +25,16 @@ object Player extends App {
   case class Contestant(score: Int = 0, scans: Seq[Id] = Seq.empty[Id], drones: Set[Drone] = Set.empty[Drone])
 
   case class TurnContext(player: Contestant, foe: Contestant, creatures: Map[Id, (Point, Point)])
+
+  sealed abstract class Action(val light: Boolean)
+  object Action {
+    case class Wait(override val light: Boolean = false) extends Action(light) {
+      override def toString: String = s"WAIT ${if(light) 1 else 0}"
+    }
+    case class Move(destination: Point, override val light: Boolean = false) extends Action(light) {
+      override def toString: String = s"MOVE ${destination.x} ${destination.y} ${if(light) 1 else 0}"
+    }
+  }
 
   def readTurnContext(): TurnContext = {
 
@@ -78,6 +90,8 @@ object Player extends App {
     )
   }
 
+  def action(contexts: TurnContext*): Action = Action.Wait(contexts.size > 1)
+
   LazyList.continually(
     readTurnContext()
   )
@@ -88,10 +102,7 @@ object Player extends App {
       Console.err.println(turn)
       turn
     })
-    .map {
-      case _ :: Nil => "WAIT 0"
-      case _ => "WAIT 1"
-    }
+    .map(action(_:_*))
     .foreach(println)
 
 }
