@@ -21,7 +21,7 @@ object Solution extends App {
         case (value, index) => (value, index, line._2)
       })
       .groupBy {
-        case (_, line, row) => (line % 3, row % 3)
+        case (_, line, row) => (line / 3, row / 3)
       }
       .view
       .mapValues(_.map(_._1).groupMapReduce(identity[String])(_ => 1)(_ + _).exists(_._2 > 1))
