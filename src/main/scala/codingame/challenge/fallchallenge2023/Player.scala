@@ -84,6 +84,10 @@ object Player extends App {
     .scanLeft(Seq.empty[TurnContext])(_ :+ _)
     .tail
     .map(_.takeRight(1 + lookback))
+    .map(turn => {
+      Console.err.println(turn)
+      turn
+    })
     .map {
       case _ :: Nil => "WAIT 0"
       case _ => "WAIT 1"
