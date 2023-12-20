@@ -16,13 +16,57 @@ object Player extends App {
 
   case class GameContext(creatures: Set[Creature])
 
-  class Point(x: Int, y: Int)
+  case class Point(x: Int, y: Int)
 
   case class Drone(id: Id, position: Point, battery: Int)
 
-  case class Contestant(score: Int = 0, scans: Seq[Id] = Seq.empty[Id])
+  case class Contestant(score: Int = 0, scans: Seq[Id] = Seq.empty[Id], drones: Set[Drone] = Set.empty[Drone])
 
   case class TurnContext(player: Contestant, foe: Contestant, creatures: Map[Id, (Point, Point)])
+
+  def readTurnContext(): TurnContext = {
+
+    def readScans: Seq[Id] = Seq.fill(readLine.toInt) {
+      readLine
+    }
+
+    def readDrones: Set[Drone] = Set.fill(readLine.toInt) {
+      val Array(droneId, droneX, droneY, emergency, battery) = (readLine split " ").filter(_ != "")
+      Drone(droneId, Point(droneX.toInt, droneY.toInt), battery.toInt)
+    }
+
+    val playerScore = readLine.toInt
+    val foeScore = readLine.toInt
+
+    val playerScans = readScans
+    val foeScans = readScans
+
+    val playerDrones = readDrones
+    val foeDrones = readDrones
+
+    val droneScanCount = readLine.toInt
+    for(i <- 0 until droneScanCount) {
+      val Array(droneId, creatureId) = (readLine split " ").filter(_ != "").map (_.toInt)
+    }
+
+    val visibleCreatures = Seq.fill(readLine.toInt){
+      val Array(creatureId, creatureX, creatureY, creatureVx, creatureVy) = (readLine split " ").filter(_ != "")
+      creatureId -> (Point(creatureX.toInt, creatureY.toInt), Point(creatureVx.toInt, creatureVy.toInt))
+    }.toMap
+
+    val radarBlipCount = readLine.toInt
+    for(i <- 0 until radarBlipCount) {
+      val Array(_droneId, _creatureId, radar) = readLine split " "
+      val droneId = _droneId.toInt
+      val creatureId = _creatureId.toInt
+    }
+
+    TurnContext(
+      Contestant(playerScore, playerScans, playerDrones),
+      Contestant(foeScore, foeScans, foeDrones),
+      visibleCreatures
+    )
+  }
 
   val gameContext: GameContext = {
     val creatureCount = readLine.toInt
@@ -34,49 +78,8 @@ object Player extends App {
     )
   }
 
-  def readTurnInput(): TurnContext = {
-    val myScore = readLine.toInt
-    val foeScore = readLine.toInt
-    val myScanCount = readLine.toInt
-    for(i <- 0 until myScanCount) {
-      val creatureId = readLine.toInt
-    }
-    val foeScanCount = readLine.toInt
-    for(i <- 0 until foeScanCount) {
-      val creatureId = readLine.toInt
-    }
-    val myDroneCount = readLine.toInt
-    for(i <- 0 until myDroneCount) {
-      val Array(droneId, droneX, droneY, emergency, battery) = (readLine split " ").filter(_ != "").map (_.toInt)
-    }
-    val foeDroneCount = readLine.toInt
-    for(i <- 0 until foeDroneCount) {
-      val Array(droneId, droneX, droneY, emergency, battery) = (readLine split " ").filter(_ != "").map (_.toInt)
-    }
-    val droneScanCount = readLine.toInt
-    for(i <- 0 until droneScanCount) {
-      val Array(droneId, creatureId) = (readLine split " ").filter(_ != "").map (_.toInt)
-    }
-    val visibleCreatureCount = readLine.toInt
-    for(i <- 0 until visibleCreatureCount) {
-      val Array(creatureId, creatureX, creatureY, creatureVx, creatureVy) = (readLine split " ").filter(_ != "").map (_.toInt)
-    }
-    val radarBlipCount = readLine.toInt
-    for(i <- 0 until radarBlipCount) {
-      val Array(_droneId, _creatureId, radar) = readLine split " "
-      val droneId = _droneId.toInt
-      val creatureId = _creatureId.toInt
-    }
-
-    TurnContext(
-      Contestant(myScore),
-      Contestant(foeScore),
-      Map.empty[Id, (Point, Point)]
-    )
-  }
-
   LazyList.continually(
-    readTurnInput()
+    readTurnContext()
   )
     .scanLeft(Seq.empty[TurnContext])(_ :+ _)
     .tail
