@@ -12,19 +12,38 @@ object Player extends App {
 
   type Id = String
 
-  case class Creature(id: Id, color: Int, `type`: Int) {
+  case class Creature(color: Int, `type`: Int) {
     val points: Int = `type` + 1
   }
 
-  case class GameContext(creatures: Set[Creature])
+  case class GameContext(creatures: Map[Id, Creature])
 
-  case class Point(x: Int, y: Int)
+  trait BiDimensionalMeasurement {
+    def x: Int
+    def y: Int
+  }
+
+  implicit class NumericOps[N : Numeric](value : N) {
+    def ^(exponent: Double): Double = pow(implicitly[Numeric[N]].toDouble(value), exponent)
+  }
+
+  case class Point(x: Int, y: Int) extends BiDimensionalMeasurement {
+    def <->(other: Point): Double = sqrt(pow(other.x - x, 2.0) + pow(other.y - y, 2.0))
+    def angleWith(b: Point, c: Point): Double = {
+      val ab = this <-> b
+      val ac = this <-> c
+      val bc = b <-> c
+      acos((ab^2 + ac^2 - bc^2) / (2 * ac * ab))
+    }
+  }
+
+  case class Motion(x: Int, y: Int) extends BiDimensionalMeasurement
 
   case class Drone(id: Id, position: Point, battery: Int)
 
   case class Contestant(score: Int = 0, scans: Seq[Id] = Seq.empty[Id], drones: Set[Drone] = Set.empty[Drone])
 
-  case class TurnContext(player: Contestant, foe: Contestant, creatures: Map[Id, (Point, Point)])
+  case class TurnContext(player: Contestant, foe: Contestant, creatures: Map[Id, (Point, Motion)])
 
   sealed abstract class Action(val light: Boolean)
   object Action {
@@ -63,7 +82,7 @@ object Player extends App {
 
     val visibleCreatures = Seq.fill(readLine.toInt){
       val Array(creatureId, creatureX, creatureY, creatureVx, creatureVy) = (readLine split " ").filter(_ != "")
-      creatureId -> (Point(creatureX.toInt, creatureY.toInt), Point(creatureVx.toInt, creatureVy.toInt))
+      creatureId -> (Point(creatureX.toInt, creatureY.toInt), Motion(creatureVx.toInt, creatureVy.toInt))
     }.toMap
 
     val radarBlipCount = readLine.toInt
@@ -83,14 +102,40 @@ object Player extends App {
   val gameContext: GameContext = {
     val creatureCount = readLine.toInt
     GameContext(
-      Set.fill(creatureCount) {
+      Seq.fill(creatureCount) {
         val Array(creatureId, color, _type) = (readLine split " ").filter(_ != "")
-        Creature(creatureId, color.toInt, _type.toInt)
+        creatureId -> Creature(color.toInt, _type.toInt)
       }
+        .toMap
     )
   }
 
-  def action(contexts: TurnContext*): Action = Action.Wait(contexts.size > 1)
+  def actions(contexts: TurnContext*): Map[Id, Action] = {
+
+    def distancesMatrix(context: TurnContext): Map[Id, Map[Id, Double]] =
+      context.player.drones.map { drone =>
+        drone.id -> context.creatures.map {
+          case (id, (position, _)) => id -> (drone.position <-> position)
+        }
+      }
+        .toMap
+
+    val distances = distancesMatrix(contexts.last)
+
+    distances.view.mapValues(_.toSeq.minBy(_._2))
+
+    /*
+    1. Filtrer les créatures déjà scannées.
+    2. S'il existe des créatures non scannées entre 800 et 2000, activer la lumière.
+    3. Aller en direction de la créature non scannée à plus de 2000 qui possède le meilleur ratio
+    de Points rapportés / Distance.
+     */
+
+    contexts.last.player.drones.map { drone =>
+      drone.id -> Action.Wait(contexts.size > 1)
+    }
+      .toMap
+  }
 
   LazyList.continually(
     readTurnContext()
@@ -102,7 +147,8 @@ object Player extends App {
       Console.err.println(turn)
       turn
     })
-    .map(action(_:_*))
+    .map(actions(_:_*))
+    .map(_.head._2)
     .foreach(println)
 
 }
