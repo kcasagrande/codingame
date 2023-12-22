@@ -110,7 +110,7 @@ object Player extends App {
     )
   }
 
-  def actions(contexts: TurnContext*): Map[Id, Action] = {
+  def actions(gameContext: GameContext, contexts: TurnContext*): Map[Id, Action] = {
 
     def distancesMatrix(context: TurnContext): Map[Id, Map[Id, Double]] =
       context.player.drones.map { drone =>
@@ -147,7 +147,7 @@ object Player extends App {
       Console.err.println(turn)
       turn
     })
-    .map(actions(_:_*))
+    .map(actions(gameContext, _:_*))
     .map(_.head._2)
     .foreach(println)
 
