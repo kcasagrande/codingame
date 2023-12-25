@@ -136,19 +136,6 @@ object Player extends App {
   }
 
   def actions(gameContext: GameContext, contexts: TurnContext*): Map[DroneId, Action] = {
-
-    def distancesMatrix(context: TurnContext): Map[DroneId, Map[CreatureId, Double]] =
-      context.player.drones.map { drone =>
-        drone.id -> context.creatures.map {
-          case (id, CreatureSituation(position, _)) => id -> (drone.position <-> position)
-        }
-      }
-        .toMap
-
-    val distances = distancesMatrix(contexts.last)
-
-    distances.view.mapValues(_.toSeq.minBy(_._2))
-
     /*
     1. Filtrer les créatures déjà scannées.
     2. S'il existe des créatures non scannées entre 800 et 2000, activer la lumière.
