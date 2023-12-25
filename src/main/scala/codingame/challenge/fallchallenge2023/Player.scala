@@ -156,27 +156,30 @@ object Player extends App {
     de Points rapportés / Distance.
      */
     
-    def activateLight(context: TurnContext): Map[DroneId, Boolean] =
-      context.droneCreatureRelations
-        .map {
-          case (droneId, creatureRelations) => (droneId, creatureRelations
-            .unscanned(context.player.scans)
-            .filter(_._2.distance > 800)
-            .exists(_._2.distance <= 2000)
-          )
-        }
+    def activateLight(creatureRelations: Map[CreatureId, DroneCreatureRelation]): Boolean =
+      creatureRelations
+        .filter(_._2.distance > 800)
+        .exists(_._2.distance <= 2000)
 
+
+    def activateLights(context: TurnContext): Map[DroneId, Boolean] =
+      context.droneCreatureRelations
+        .unscanned(context.player.scans)
+        .view
+        .mapValues(activateLight)
+        .toMap
+
+    def closestCreature(creatureRelations: Map[CreatureId, DroneCreatureRelation]): CreatureId =
+      creatureRelations.minBy(_._2.distance)._1
+    
     def chooseDirections(context: TurnContext): Map[DroneId, Point] =
       context.droneCreatureRelations
-        .map {
-          case (droneId, creatureRelations) => (droneId, creatureRelations
-            .unscanned(context.player.scans)
-            .minBy(_._2.distance)
-          )
-        }
-        .map {
-          case (droneId, (creatureId, _)) => (droneId, context.creatures(creatureId).position)
-        }
+        .unscanned(context.player.scans)
+        .view
+        .mapValues(closestCreature)
+        .mapValues(context.creatures)
+        .mapValues(_.position)
+        .toMap
     
     contexts.last.droneCreatureRelations.map {
       case (droneId, creatures) => creatures.filterNot { creature =>
