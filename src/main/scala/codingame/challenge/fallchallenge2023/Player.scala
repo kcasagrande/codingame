@@ -168,12 +168,12 @@ object Player extends App {
         .mapValues(_.position)
         .toMap
     
-    contexts.last.droneCreatureRelations.map {
-      case (droneId, creatures) => creatures.filterNot { creature =>
-        contexts.last.player.scans.contains(creature._1)
-      }
-        droneId -> Action.Wait(contexts.size > 1)
+    val lights = activateLights(contexts.last)
+    val directions = chooseDirections(contexts.last)
+    contexts.last.player.drones.map { drone =>
+      drone.id -> Action.Move(directions(drone.id), lights(drone.id))
     }
+      .toMap
   }
 
   LazyList.continually(
