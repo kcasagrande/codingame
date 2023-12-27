@@ -1,7 +1,6 @@
 package codingame.challenge.fallchallenge2023
 
 import math._
-import scala.util._
 import scala.io.StdIn._
 
 /**
